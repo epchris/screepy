@@ -1,4 +1,10 @@
+import { Colony } from "management/Colony";
+import { Builder } from "roles/Builder";
+import { Fixer } from "roles/Fixer";
+import { Harvester } from "roles/Harvester";
+import { Upgrader } from "roles/Upgrader";
 import { ErrorMapper } from "utils/ErrorMapper";
+import { generateRandomNumber } from "utils/GenerateRandomNumber";
 
 declare global {
   /*
@@ -19,6 +25,17 @@ declare global {
     role: string;
     room: string;
     working: boolean;
+    target?: Id<Source> | Id<Structure>;
+    state?: string;
+  }
+
+  interface SpawnMemory {
+    activeCreeps: Array<string>
+    spawningCreep: string
+  }
+
+  interface RoomMemory {
+    sources: Array<Id<Source>>
   }
 
   // Syntax for adding proprties to `global` (ex "global.log")
@@ -33,6 +50,12 @@ declare global {
 // This utility uses source maps to get the line numbers and file names of the original, TS source code
 export const loop = ErrorMapper.wrapLoop(() => {
   console.log(`Current game tick is ${Game.time}`);
+
+  for(var spawnName in Game.spawns) {
+    let spawn = Game.spawns[spawnName]
+    console.log("Managing " + spawn.name)
+    new Colony(spawn).manage()
+  }
 
   // Automatically delete memory of missing creeps
   for (const name in Memory.creeps) {
